@@ -1,0 +1,79 @@
+{{template "base" .}}
+
+{{define "content"}}
+<div class="breadcrumb">
+  <a href="/">Home</a>
+  <span>/</span>
+  <a href="/owners">Owners</a>
+  <span>/</span>
+  <span>{{.Owner.Name}}</span>
+</div>
+
+<div class="page-header">
+  <div>
+    <h1>{{.Owner.Name}}</h1>
+    <div class="subtitle">
+      {{if .Owner.Phone}}// {{.Owner.Phone}}{{end}}
+      {{if and .Owner.Phone .Owner.Email}} &nbsp;·&nbsp; {{end}}
+      {{if .Owner.Email}}{{.Owner.Email}}{{end}}
+    </div>
+  </div>
+  <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+    <a href="/vehicles/new?owner_id={{.Owner.ID}}" class="btn btn-primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Vehicle
+    </a>
+    <a href="/owners/{{.Owner.ID}}/edit" class="btn btn-secondary">Edit</a>
+  </div>
+</div>
+
+{{if .Owner.Notes}}
+<div style="background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--accent2);border-radius:var(--radius);padding:0.75rem 1rem;margin-bottom:1.5rem;font-size:0.88rem;color:var(--text2);">
+  {{.Owner.Notes}}
+</div>
+{{end}}
+
+<div class="card">
+  <div class="card-header">
+    <h2>Vehicles &amp; Equipment</h2>
+    <span style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text3);">{{len .Owner.Vehicles}} total</span>
+  </div>
+  <div class="card-body" style="padding: 1rem;">
+    {{if .Owner.Vehicles}}
+    <div class="vehicle-list">
+      {{range .Owner.Vehicles}}
+      <a href="/vehicles/{{.ID}}" class="vehicle-row">
+        <div class="vehicle-icon">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13" rx="1"/><path d="M16 8h5l2 4v4h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
+        </div>
+        <div style="flex:1;min-width:0;">
+          <div class="vehicle-title">{{vehicleTitle .}}</div>
+          <div class="vehicle-sub">
+            {{if .Color}}{{.Color}}{{end}}
+            {{if and .Color .LicPlate}} · {{end}}
+            {{if .LicPlate}}Plate: {{.LicPlate}}{{end}}
+            {{if and (eq .Color "") (eq .LicPlate "")}}No additional details{{end}}
+          </div>
+        </div>
+        {{if .VIN}}<span class="tag">{{.VIN}}</span>{{end}}
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--text3);flex-shrink:0;"><polyline points="9 18 15 12 9 6"/></svg>
+      </a>
+      {{end}}
+    </div>
+    {{else}}
+    <div class="empty">
+      <div>No vehicles recorded yet.</div>
+      <a href="/vehicles/new?owner_id={{.Owner.ID}}" class="btn btn-primary" style="margin-top:1rem;">Add Vehicle</a>
+    </div>
+    {{end}}
+  </div>
+</div>
+
+<div class="danger-zone">
+  <h3>⚠ Danger Zone</h3>
+  <p>Deleting this owner will permanently remove all their vehicles and maintenance records.</p>
+  <form method="POST" action="/owners/{{.Owner.ID}}/delete" onsubmit="return confirm('Delete {{.Owner.Name}} and ALL their vehicles/logs? This cannot be undone.');">
+    <button type="submit" class="btn btn-danger btn-sm">Delete Owner</button>
+  </form>
+</div>
+{{end}}

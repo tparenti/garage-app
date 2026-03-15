@@ -1,0 +1,75 @@
+{{template "base" .}}
+
+{{define "content"}}
+<div class="page-header">
+  <div>
+    <h1>Dashboard</h1>
+    <div class="subtitle">// maintenance tracking system</div>
+  </div>
+  <a href="/owners/new" class="btn btn-primary">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    Add Owner
+  </a>
+</div>
+
+<div class="stat-grid">
+  <div class="stat-card">
+    <div class="stat-label">Owners</div>
+    <div class="stat-value">{{.TotalOwners}}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Vehicles / Equipment</div>
+    <div class="stat-value">{{.TotalVehicles}}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Log Entries</div>
+    <div class="stat-value">{{.TotalLogs}}</div>
+  </div>
+</div>
+
+<div style="display:grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; align-items: start;">
+
+  <div class="card">
+    <div class="card-header">
+      <h2>Owners</h2>
+      <a href="/owners" class="btn btn-secondary btn-sm">View All</a>
+    </div>
+    <div class="card-body" style="padding: 0.75rem 1rem;">
+      {{if .Owners}}
+        {{range .Owners}}
+        <a href="/owners/{{.ID}}" style="display:flex; align-items:center; gap:0.75rem; padding:0.6rem 0.25rem; border-bottom:1px solid var(--border); text-decoration:none; color:inherit;">
+          <div style="width:8px;height:8px;background:var(--accent2);border-radius:50%;flex-shrink:0;"></div>
+          <span style="font-family:'Barlow Condensed',sans-serif;font-weight:600;letter-spacing:0.03em;text-transform:uppercase;font-size:1rem;flex:1;">{{.Name}}</span>
+          {{if .Phone}}<span style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--text3);">{{.Phone}}</span>{{end}}
+        </a>
+        {{end}}
+      {{else}}
+        <div class="empty" style="padding:2rem;">No owners yet.<br><a href="/owners/new" style="color:var(--accent);">Add the first one →</a></div>
+      {{end}}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>Recent Work</h2>
+    </div>
+    <div class="card-body" style="padding: 0.5rem 1.25rem;">
+      {{if .Recent}}
+        {{range .Recent}}
+        <div class="recent-entry">
+          <div class="recent-dot"></div>
+          <div style="flex:1;min-width:0;">
+            <div class="recent-meta">{{formatDate .Log.RecordDate}} &nbsp;·&nbsp; {{.OwnerName}} &nbsp;·&nbsp; {{.Vehicle.Year}} {{.Vehicle.Make}} {{.Vehicle.Model}}</div>
+            <div class="recent-work">{{.Log.WorkDone}}</div>
+            {{if gt .Log.Mileage 0}}<div style="font-family:'Share Tech Mono',monospace;font-size:0.75rem;color:var(--accent);margin-top:0.15rem;">{{formatMileage .Log.Mileage}} mi</div>{{end}}
+          </div>
+        </div>
+        {{end}}
+      {{else}}
+        <div class="empty">No log entries yet.</div>
+      {{end}}
+    </div>
+  </div>
+
+</div>
+{{end}}

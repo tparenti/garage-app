@@ -1,0 +1,85 @@
+{{template "base" .}}
+
+{{define "content"}}
+<div class="breadcrumb">
+  <a href="/">Home</a>
+  <span>/</span>
+  <a href="/owners">Owners</a>
+  <span>/</span>
+  <span>{{.Title}}</span>
+</div>
+
+<div class="page-header">
+  <div>
+    <h1>{{.Title}}</h1>
+  </div>
+</div>
+
+<div class="card" style="max-width:720px;">
+  <div class="card-header">
+    <h2>Vehicle / Equipment Details</h2>
+  </div>
+  <div class="card-body">
+    {{if .Vehicle.ID}}
+    <form method="POST" action="/vehicles/{{.Vehicle.ID}}/edit">
+    {{else}}
+    <form method="POST" action="/vehicles/new">
+    {{end}}
+      <input type="hidden" name="owner_id" value="{{.Vehicle.OwnerID}}">
+
+      {{if eq .Vehicle.ID 0}}
+      <div class="form-group" style="margin-bottom:1rem;">
+        <label for="owner_id_sel">Owner *</label>
+        <select id="owner_id_sel" name="owner_id" required>
+          <option value="">— Select Owner —</option>
+          {{range .Owners}}
+          <option value="{{.ID}}" {{if eq .ID $.Vehicle.OwnerID}}selected{{end}}>{{.Name}}</option>
+          {{end}}
+        </select>
+      </div>
+      {{end}}
+
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="year">Year</label>
+          <input type="text" id="year" name="year" value="{{.Vehicle.Year}}" placeholder="2019" maxlength="4">
+        </div>
+        <div class="form-group">
+          <label for="make">Make *</label>
+          <input type="text" id="make" name="make" value="{{.Vehicle.Make}}" required placeholder="Ford">
+        </div>
+        <div class="form-group">
+          <label for="model">Model *</label>
+          <input type="text" id="model" name="model" value="{{.Vehicle.Model}}" required placeholder="F-150">
+        </div>
+        <div class="form-group">
+          <label for="color">Color</label>
+          <input type="text" id="color" name="color" value="{{.Vehicle.Color}}" placeholder="Oxford White">
+        </div>
+        <div class="form-group">
+          <label for="lic_plate">License Plate</label>
+          <input type="text" id="lic_plate" name="lic_plate" value="{{.Vehicle.LicPlate}}" placeholder="ABC-1234">
+        </div>
+        <div class="form-group">
+          <label for="vin">VIN</label>
+          <input type="text" id="vin" name="vin" value="{{.Vehicle.VIN}}" placeholder="1FTFW1ET0DKE..." maxlength="17">
+        </div>
+        <div class="form-group form-full">
+          <label for="notes">Notes</label>
+          <textarea id="notes" name="notes" placeholder="Any notes about this vehicle (mods, issues, history)...">{{.Vehicle.Notes}}</textarea>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Save Vehicle</button>
+        {{if .Vehicle.ID}}
+        <a href="/vehicles/{{.Vehicle.ID}}" class="btn btn-secondary">Cancel</a>
+        {{else if .Vehicle.OwnerID}}
+        <a href="/owners/{{.Vehicle.OwnerID}}" class="btn btn-secondary">Cancel</a>
+        {{else}}
+        <a href="/owners" class="btn btn-secondary">Cancel</a>
+        {{end}}
+      </div>
+    </form>
+  </div>
+</div>
+{{end}}

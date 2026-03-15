@@ -1,0 +1,12 @@
+version: "3.8"
+
+services:
+  wrenchlog:
+    build: .
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./wrenchlog.db:/app/wrenchlog.db
+      - ./templates:/app/templates:ro
+      - ./static:/app/static:ro
+    restart: unless-stopped
