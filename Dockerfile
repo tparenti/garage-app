@@ -1,27 +1,39 @@
-# Multi-stage build for WrenchLog (SQLite requires CGO)
-FROM golang:1.20-alpine AS build
+# ── Stage 1: Build ────────────────────────────────────────────────────────────
+FROM golang:1.21-alpine AS builder
 
-RUN apk add --no-cache build-base sqlite-dev git
-WORKDIR /src
+# gcc + musl-dev needed to compile go-sqlite3 (CGO)
+RUN apk add --no-cache gcc musl-dev
 
-# dependency download
+WORKDIR /app
+
+# Download dependencies first (better layer caching)
 COPY go.mod go.sum ./
 RUN go mod download
 
-# copy source and build
+# Copy all source and assets, then build
 COPY . .
-RUN CGO_ENABLED=1 GOOS=linux go build -o /app/wrenchlog
+RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags="-w -s" -o wrenchlog .
 
-# Runtime image
-FROM alpine:3.18
-RUN apk add --no-cache ca-certificates sqlite
+# ── Stage 2: Run ──────────────────────────────────────────────────────────────
+FROM alpine:3.19
 
-COPY --from=build /app/wrenchlog /app/wrenchlog
+# ca-certificates for any outbound HTTPS; tzdata for correct timestamps
+RUN apk add --no-cache ca-certificates tzdata
+
 WORKDIR /app
 
-# Include templates/static so the binary can find them at /app/templates
-COPY templates ./templates
-COPY static ./static
+# Copy binary and assets all from the builder — avoids missing-dir errors
+# from the build context when static/ is empty or not tracked by git
+COPY --from=builder /app/wrenchlog .
+COPY --from=builder /app/templates/ templates/
+COPY --from=builder /app/static/    static/
+
+# Data directory — mount a volume here to persist the SQLite database
+RUN mkdir -p /data
 
 EXPOSE 8080
-CMD ["/app/wrenchlog"]
+
+# Pass DB path via environment variable (main.go reads DB_PATH, falls back to ./wrenchlog.db)
+ENV DB_PATH=/data/wrenchlog.db
+
+CMD ["./wrenchlog"]
