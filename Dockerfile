@@ -10,8 +10,8 @@ RUN go mod download
 
 COPY . .
 
-# Ensure static dir exists even if git didn't track it
-RUN mkdir -p static
+# Guarantee both asset dirs exist regardless of git tracking
+RUN mkdir -p templates static
 
 RUN CGO_ENABLED=1 GOOS=linux go build -a -ldflags="-w -s" -o wrenchlog .
 
@@ -22,11 +22,11 @@ RUN apk add --no-cache ca-certificates tzdata
 
 WORKDIR /app
 
+RUN mkdir -p templates static /data
+
 COPY --from=builder /app/wrenchlog .
 COPY --from=builder /app/templates/ templates/
 COPY --from=builder /app/static/    static/
-
-RUN mkdir -p /data
 
 EXPOSE 8080
 

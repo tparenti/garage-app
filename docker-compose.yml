@@ -3,10 +3,18 @@ version: "3.8"
 services:
   wrenchlog:
     build: .
+    container_name: wrenchlog
     ports:
       - "8083:8080"
     volumes:
-      - ./wrenchlog.db:/app/wrenchlog.db
-      - ./templates:/app/templates:ro
-      - ./static:/app/static:ro
+      # Persists the SQLite database across container restarts/rebuilds
+      - wrenchlog_data:/data
     restart: unless-stopped
+    environment:
+      - DB_PATH=/data/wrenchlog.db
+      # Uncomment to set your local timezone for correct log timestamps
+      # - TZ=America/New_York
+ 
+volumes:
+  wrenchlog_data:
+ 
