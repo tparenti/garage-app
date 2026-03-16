@@ -52,7 +52,20 @@ func main() {
 		"add": func(a, b int) int { return a + b },
 	}
 
-	tmpl = template.Must(template.New("").Funcs(funcMap).ParseGlob("templates/*.html"))
+	// Parse templates in a specific order - dashboard.html last so its "content" block wins
+	tmpl = template.Must(
+		template.New("").Funcs(funcMap).
+			ParseFiles(
+				"templates/base.html",
+				"templates/owners.html",
+				"templates/owner_form.html",
+				"templates/owner_detail.html",
+				"templates/vehicle_form.html",
+				"templates/vehicle_detail.html",
+				"templates/log_form.html",
+				"templates/dashboard.html",
+			),
+	)
 
 	mux := http.NewServeMux()
 
